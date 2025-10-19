@@ -1,0 +1,41 @@
+{
+  "name": "aipply-crawler-api",
+  "version": "1.0.0",
+  "description": "AIpply Web Crawler API powered by Exa for discovering development opportunities",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "migrate": "node src/database/migrate.js",
+    "setup": "node scripts/setup.js",
+    "setup-db": "node scripts/setup-database.js",
+    "test-passwords": "node scripts/test-passwords.js",
+    "test-exa": "node scripts/test-exa.js"
+  },
+  "keywords": ["aipply", "crawler", "api", "exa", "opportunities", "scholarships"],
+  "author": "AIpply Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1",
+    "joi": "^17.11.0",
+    "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12",
+    "winston": "^3.11.0",
+    "uuid": "^9.0.1",
+    "moment": "^2.29.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
