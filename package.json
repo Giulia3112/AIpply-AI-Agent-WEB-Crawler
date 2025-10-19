@@ -4,7 +4,7 @@
   "description": "AIpply Web Crawler API powered by Exa for discovering development opportunities",
   "main": "src/server.js",
   "scripts": {
-    "start": "node scripts/start-production.js",
+    "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest",
     "migrate": "node src/database/migrate.js",
@@ -12,7 +12,7 @@
     "setup-db": "node scripts/setup-database.js",
     "test-passwords": "node scripts/test-passwords.js",
     "test-exa": "node scripts/test-exa.js",
-    "postinstall": "echo 'Post-install complete'",
+    "postinstall": "npm run migrate",
     "build": "echo 'No build step required for Node.js'",
     "deploy": "npm run migrate && npm start"
   },
