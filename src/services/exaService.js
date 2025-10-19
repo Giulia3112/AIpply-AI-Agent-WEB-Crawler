@@ -6,7 +6,15 @@ class ExaService {
   constructor() {
     this.apiKey = process.env.EXA_API_KEY;
     this.baseUrl = process.env.EXA_BASE_URL || 'https://api.exa.ai';
-    
+    this.client = null;
+    this.initialized = false;
+  }
+
+  initialize() {
+    if (this.initialized) {
+      return;
+    }
+
     if (!this.apiKey) {
       throw new Error('EXA_API_KEY environment variable is required');
     }
@@ -19,10 +27,13 @@ class ExaService {
       },
       timeout: 30000
     });
+
+    this.initialized = true;
   }
 
   // Search for opportunities using Exa API
   async searchOpportunities(query, filters = {}) {
+    this.initialize();
     try {
       logger.info('Searching opportunities with Exa API', { query, filters });
 
@@ -262,6 +273,7 @@ class ExaService {
 
   // Test API connection
   async testConnection() {
+    this.initialize();
     try {
       const response = await this.client.post('/search', {
         query: 'test',
