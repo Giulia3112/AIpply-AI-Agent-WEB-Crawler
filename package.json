@@ -4,18 +4,26 @@
   "description": "AIpply Web Crawler API powered by Exa for discovering development opportunities",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node scripts/start-production.js",
     "dev": "nodemon src/server.js",
     "test": "jest",
     "migrate": "node src/database/migrate.js",
     "setup": "node scripts/setup.js",
     "setup-db": "node scripts/setup-database.js",
     "test-passwords": "node scripts/test-passwords.js",
-    "test-exa": "node scripts/test-exa.js"
+    "test-exa": "node scripts/test-exa.js",
+    "postinstall": "echo 'Post-install complete'",
+    "build": "echo 'No build step required for Node.js'",
+    "deploy": "npm run migrate && npm start"
   },
-  "keywords": ["aipply", "crawler", "api", "exa", "opportunities", "scholarships"],
+  "keywords": ["aipply", "crawler", "api", "exa", "opportunities", "scholarships", "railway", "deployment"],
   "author": "AIpply Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Giulia3112/AIpply-AI-Agent-WEB-Crawler.git"
+  },
+  "homepage": "https://github.com/Giulia3112/AIpply-AI-Agent-WEB-Crawler#readme",
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
