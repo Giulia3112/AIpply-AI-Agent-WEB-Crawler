@@ -12,7 +12,7 @@
     "setup-db": "node scripts/setup-database.js",
     "test-passwords": "node scripts/test-passwords.js",
     "test-exa": "node scripts/test-exa.js",
-    "postinstall": "npm run migrate",
+    "postinstall": "echo 'Post-install complete'",
     "build": "echo 'No build step required for Node.js'",
     "deploy": "npm run migrate && npm start"
   },

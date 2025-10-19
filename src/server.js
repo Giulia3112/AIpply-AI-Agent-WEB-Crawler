@@ -52,17 +52,15 @@ async function startServer() {
     await connectDatabase();
     logger.info('Database connected successfully');
 
-    // Run database migration in production
-    if (process.env.NODE_ENV === 'production') {
-      logger.info('Running database migration...');
-      try {
-        const runMigrations = require('./database/migrate');
-        await runMigrations();
-        logger.info('Database migration completed successfully');
-      } catch (migrationError) {
-        logger.warn('Database migration warning:', migrationError.message);
-        // Continue startup even if migration has warnings
-      }
+    // Run database migration
+    logger.info('Running database migration...');
+    try {
+      const runMigrations = require('./database/migrate');
+      await runMigrations();
+      logger.info('Database migration completed successfully');
+    } catch (migrationError) {
+      logger.warn('Database migration warning:', migrationError.message);
+      // Continue startup even if migration has warnings
     }
 
     // Start the server

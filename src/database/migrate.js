@@ -8,6 +8,12 @@ const runMigrations = async () => {
   try {
     logger.info('Starting database migration...');
     
+    // Check if DATABASE_URL is available
+    if (!process.env.DATABASE_URL && !process.env.DB_HOST) {
+      logger.warn('No database configuration found, skipping migration');
+      return;
+    }
+    
     // Connect to database
     await connectDatabase();
     
