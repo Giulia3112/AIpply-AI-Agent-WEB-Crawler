@@ -32,13 +32,32 @@ A powerful Node.js backend service that automatically discovers and stores devel
 - Exa API key
 - npm or yarn
 
-## 🚀 Quick Start
+## 🚀 Quick Deploy to Railway
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/deploy?template=https://github.com/Giulia3112/AIpply-AI-Agent-WEB-Crawler)
+
+### One-Click Deployment:
+1. Click the "Deploy on Railway" button above
+2. Sign in with GitHub
+3. Add your environment variables (see below)
+4. Deploy!
+
+### Manual Railway Deployment:
+1. Go to [Railway](https://railway.app)
+2. Sign in with GitHub
+3. Click "New Project" → "Deploy from GitHub repo"
+4. Select `Giulia3112/AIpply-AI-Agent-WEB-Crawler`
+5. Add PostgreSQL database
+6. Set environment variables
+7. Deploy!
+
+## 🏠 Local Development
 
 ### 1. Clone and Install
 
 ```bash
-git clone <repository-url>
-cd aipply-webscraper-exaapi
+git clone https://github.com/Giulia3112/AIpply-AI-Agent-WEB-Crawler.git
+cd AIpply-AI-Agent-WEB-Crawler
 npm install
 ```
 
