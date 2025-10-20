@@ -49,27 +49,52 @@ app.use(errorHandler);
 // Start server
 async function startServer() {
   try {
-    // Connect to database
-    await connectDatabase();
-    logger.info('Database connected successfully');
+    logger.info('Starting AIpply Crawler API server...');
+    logger.info(`Environment: ${process.env.NODE_ENV}`);
+    logger.info(`Port: ${PORT}`);
+    
+    // Check required environment variables
+    const requiredEnvVars = ['EXA_API_KEY', 'API_KEY'];
+    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    
+    if (missingVars.length > 0) {
+      logger.warn(`Missing environment variables: ${missingVars.join(', ')}`);
+      logger.warn('Server will start but some features may not work properly');
+    }
 
-    // Run database migration
-    logger.info('Running database migration...');
+    // Connect to database (optional for basic functionality)
     try {
-      const runMigrations = require('./database/migrate');
-      await runMigrations();
-      logger.info('Database migration completed successfully');
-    } catch (migrationError) {
-      logger.warn('Database migration warning:', migrationError.message);
-      // Continue startup even if migration has warnings
+      await connectDatabase();
+      logger.info('Database connected successfully');
+
+      // Run database migration
+      logger.info('Running database migration...');
+      try {
+        const runMigrations = require('./database/migrate');
+        await runMigrations();
+        logger.info('Database migration completed successfully');
+      } catch (migrationError) {
+        logger.warn('Database migration warning:', migrationError.message);
+        // Continue startup even if migration has warnings
+      }
+    } catch (dbError) {
+      logger.warn('Database connection failed:', dbError.message);
+      logger.warn('Server will start without database connection');
     }
 
     // Start the server
-    app.listen(PORT, () => {
-      logger.info(`AIpply Crawler API server running on port ${PORT}`);
-      logger.info(`Environment: ${process.env.NODE_ENV}`);
-      logger.info(`Health check: http://localhost:${PORT}/health`);
+    const server = app.listen(PORT, () => {
+      logger.info(`✅ AIpply Crawler API server running on port ${PORT}`);
+      logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
+      logger.info('🚀 Server is ready to accept requests');
     });
+
+    // Handle server errors
+    server.on('error', (error) => {
+      logger.error('Server error:', error);
+      process.exit(1);
+    });
+
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

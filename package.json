@@ -4,7 +4,7 @@
   "description": "AIpply Web Crawler API powered by Exa for discovering development opportunities",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node scripts/start-production.js",
     "dev": "nodemon src/server.js",
     "build": "echo 'No build step required for Node.js'",
     "test": "jest",

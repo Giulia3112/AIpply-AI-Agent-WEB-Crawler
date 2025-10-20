@@ -13,28 +13,35 @@ const logger = winston.createLogger({
   format: logFormat,
   defaultMeta: { service: 'aipply-crawler-api' },
   transports: [
-    new winston.transports.File({ 
-      filename: 'logs/error.log', 
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
-    }),
-    new winston.transports.File({ 
-      filename: 'logs/combined.log',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
+    // Always log to console in production for Railway
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
     })
   ]
 });
 
-// If we're not in production, log to the console as well
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    )
+// Only add file transports if logs directory exists (local development)
+const fs = require('fs');
+const path = require('path');
+const logsDir = path.join(process.cwd(), 'logs');
+
+if (fs.existsSync(logsDir)) {
+  logger.add(new winston.transports.File({ 
+    filename: 'logs/error.log', 
+    level: 'error',
+    maxsize: 5242880, // 5MB
+    maxFiles: 5
+  }));
+  logger.add(new winston.transports.File({ 
+    filename: 'logs/combined.log',
+    maxsize: 5242880, // 5MB
+    maxFiles: 5
   }));
 }
+
+// Console logging is now handled above
 
 module.exports = logger;

@@ -1,72 +1,22 @@
 #!/usr/bin/env node
 
-const { spawn } = require('child_process');
+// Production startup script for Railway deployment
+const fs = require('fs');
 const path = require('path');
 
-// Simple console logging for production startup
-const log = (message) => {
-  console.log(`[${new Date().toISOString()}] ${message}`);
-};
-
-async function startApp() {
+// Ensure logs directory exists
+const logsDir = path.join(process.cwd(), 'logs');
+if (!fs.existsSync(logsDir)) {
   try {
-    log('Starting AIpply Web Crawler API...');
-    
-    // Run database migration first
-    log('Running database migration...');
-    const migrateProcess = spawn('node', ['src/database/migrate.js'], {
-      stdio: 'inherit',
-      env: process.env,
-      cwd: process.cwd()
-    });
-
-    migrateProcess.on('close', (code) => {
-      if (code === 0) {
-        log('Database migration completed successfully');
-        
-        // Start the main application
-        log('Starting main application...');
-        const appProcess = spawn('node', ['src/server.js'], {
-          stdio: 'inherit',
-          env: process.env,
-          cwd: process.cwd()
-        });
-
-        appProcess.on('close', (code) => {
-          log(`Application exited with code ${code}`);
-          process.exit(code);
-        });
-
-        appProcess.on('error', (error) => {
-          console.error('Failed to start application:', error);
-          process.exit(1);
-        });
-      } else {
-        console.error(`Database migration failed with code ${code}`);
-        process.exit(code);
-      }
-    });
-
-    migrateProcess.on('error', (error) => {
-      console.error('Failed to run database migration:', error);
-      process.exit(1);
-    });
-
+    fs.mkdirSync(logsDir, { recursive: true });
+    console.log('Created logs directory');
   } catch (error) {
-    console.error('Failed to start application:', error);
-    process.exit(1);
+    console.warn('Could not create logs directory:', error.message);
   }
 }
 
-// Handle graceful shutdown
-process.on('SIGTERM', () => {
-  log('SIGTERM received, shutting down gracefully');
-  process.exit(0);
-});
+// Set production environment
+process.env.NODE_ENV = 'production';
 
-process.on('SIGINT', () => {
-  log('SIGINT received, shutting down gracefully');
-  process.exit(0);
-});
-
-startApp();
+// Start the application
+require('../src/server.js');
