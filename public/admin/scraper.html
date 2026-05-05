@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIpply - Admin Scraper Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid #334155;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .logo-text { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    .logo-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    .admin-badge {
+      background: #7c3aed;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .stat-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-value { font-size: 32px; font-weight: 700; margin-top: 8px; }
+    .stat-value.total { color: #60a5fa; }
+    .stat-value.pending { color: #fbbf24; }
+    .stat-value.approved { color: #34d399; }
+    .stat-value.rejected { color: #f87171; }
+
+    /* Scraper Panel */
+    .panel {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .panel-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title .icon { font-size: 20px; }
+    
+    .scraper-form {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .form-group { flex: 1; min-width: 200px; }
+    .form-label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; }
+    .form-input {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #e2e8f0;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: #6366f1; }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-success {
+      background: #059669;
+      color: white;
+      padding: 6px 14px;
+      font-size: 13px;
+    }
+    .btn-success:hover { background: #047857; }
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+      padding: 6px 14px;
+      font-size: 13px;
+    }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    
+    /* Progress */
+    .progress-container {
+      display: none;
+      margin-top: 16px;
+    }
+    .progress-bar-wrap {
+      background: #0f172a;
+      border-radius: 8px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 8px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+    .progress-text { font-size: 13px; color: #94a3b8; }
+    
+    /* Sites list */
+    .sites-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .site-item {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .site-item .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #334155;
+      flex-shrink: 0;
+    }
+    .site-item.scraping .dot { background: #fbbf24; animation: pulse 1s infinite; }
+    .site-item.done .dot { background: #34d399; }
+    .site-item.error .dot { background: #f87171; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    
+    /* Results log */
+    .log-container {
+      display: none;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .log-entry { margin-bottom: 4px; }
+    .log-entry.info { color: #60a5fa; }
+    .log-entry.success { color: #34d399; }
+    .log-entry.warning { color: #fbbf24; }
+    .log-entry.error { color: #f87171; }
+    
+    /* Opportunities Table */
+    .opportunities-section { margin-top: 0; }
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-select {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #e2e8f0;
+      font-size: 13px;
+      outline: none;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #e2e8f0;
+      font-size: 13px;
+      outline: none;
+    }
+    .search-input:focus, .filter-select:focus { border-color: #6366f1; }
+    
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      background: #0f172a;
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #334155;
+    }
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #1e293b;
+      vertical-align: top;
+    }
+    tr:hover td { background: #1e293b; }
+    
+    .opp-title { font-weight: 600; color: #f1f5f9; margin-bottom: 4px; }
+    .opp-org { font-size: 12px; color: #94a3b8; }
+    .opp-desc { font-size: 12px; color: #64748b; margin-top: 4px; max-width: 300px; }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-scholarship { background: #1e3a5f; color: #60a5fa; }
+    .badge-fellowship { background: #2d1b69; color: #a78bfa; }
+    .badge-grant { background: #1a3a2a; color: #34d399; }
+    .badge-accelerator { background: #3b1f0f; color: #fb923c; }
+    .badge-internship { background: #1f2d3b; color: #38bdf8; }
+    .badge-other { background: #1e293b; color: #94a3b8; }
+    
+    .confidence-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .conf-bar-wrap {
+      width: 60px;
+      height: 4px;
+      background: #334155;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .conf-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+    .conf-high { background: #34d399; }
+    .conf-med { background: #fbbf24; }
+    .conf-low { background: #f87171; }
+    .conf-text { font-size: 12px; font-weight: 600; }
+    
+    .actions { display: flex; gap: 6px; }
+    
+    .status-pending { color: #fbbf24; }
+    .status-approved { color: #34d399; }
+    .status-rejected { color: #f87171; }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #475569;
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 18px; color: #64748b; margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; }
+    
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      display: none;
+    }
+    .alert-success { background: #064e3b; border: 1px solid #059669; color: #6ee7b7; }
+    .alert-error { background: #450a0a; border: 1px solid #dc2626; color: #fca5a5; }
+    .alert-info { background: #1e3a5f; border: 1px solid #2563eb; color: #93c5fd; }
+    
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid #334155;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+    .tab:hover { color: #94a3b8; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .amount-cell { white-space: nowrap; font-size: 12px; color: #34d399; }
+    .deadline-cell { white-space: nowrap; font-size: 12px; }
+    .deadline-soon { color: #f87171; }
+    .deadline-ok { color: #94a3b8; }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .bulk-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .bulk-label { font-size: 13px; color: #94a3b8; }
+    
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .sites-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🎯</div>
+      <div>
+        <div class="logo-text">AIpply</div>
+        <div class="logo-sub">Opportunity Discovery Platform</div>
+      </div>
+    </div>
+    <span class="admin-badge">⚙️ Admin Dashboard</span>
+  </div>
+
+  <div class="container">
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-label">Total Opportunities</div>
+        <div class="stat-value total" id="statTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending Review</div>
+        <div class="stat-value pending" id="statPending">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Approved</div>
+        <div class="stat-value approved" id="statApproved">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Rejected</div>
+        <div class="stat-value rejected" id="statRejected">—</div>
+      </div>
+    </div>
+
+    <!-- Scraper Panel -->
+    <div class="panel">
+      <div class="panel-title">
+        <span class="icon">🤖</span>
+        AI-Powered Web Scraper
+      </div>
+      
+      <div id="alertBox" class="alert"></div>
+      
+      <div class="scraper-form">
+        <div class="form-group">
+          <label class="form-label">Activation Email (Restricted Access)</label>
+          <input type="email" class="form-input" id="activationEmail" 
+                 placeholder="alvaresgiulia@gmail.com" 
+                 value="alvaresgiulia@gmail.com">
+        </div>
+        <button class="btn btn-primary" id="scrapeBtn" onclick="triggerScraping()">
+          <span>🚀</span> Start Scraping (8 Sites)
+        </button>
+      </div>
+      
+      <div class="sites-grid" id="sitesGrid">
+        <div class="site-item" id="site-0"><div class="dot"></div>Scholarships.com</div>
+        <div class="site-item" id="site-1"><div class="dot"></div>Fastweb</div>
+        <div class="site-item" id="site-2"><div class="dot"></div>Grants.gov</div>
+        <div class="site-item" id="site-3"><div class="dot"></div>Y Combinator</div>
+        <div class="site-item" id="site-4"><div class="dot"></div>Techstars</div>
+        <div class="site-item" id="site-5"><div class="dot"></div>Ford Foundation</div>
+        <div class="site-item" id="site-6"><div class="dot"></div>Fulbright</div>
+        <div class="site-item" id="site-7"><div class="dot"></div>Gates Foundation</div>
+      </div>
+      
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">Initializing scraper...</div>
+      </div>
+      
+      <div class="log-container" id="logContainer"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="panel opportunities-section">
+      <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('pending')">⏳ Pending Review <span id="pendingCount" style="background:#334155;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:4px;">0</span></div>
+        <div class="tab" onclick="switchTab('approved')">✅ Approved</div>
+        <div class="tab" onclick="switchTab('all')">📋 All Opportunities</div>
+      </div>
+      
+      <div class="tab-content active" id="tab-pending">
+        <div class="filter-bar">
+          <input type="text" class="search-input" id="pendingSearch" placeholder="Search opportunities..." oninput="filterOpportunities('pending')">
+          <select class="filter-select" id="pendingTypeFilter" onchange="filterOpportunities('pending')">
+            <option value="">All Types</option>
+            <option value="scholarship">Scholarship</option>
+            <option value="fellowship">Fellowship</option>
+            <option value="grant">Grant</option>
+            <option value="accelerator">Accelerator</option>
+            <option value="internship">Internship</option>
+          </select>
+          <button class="btn btn-success btn-sm" onclick="approveAll()">✅ Approve All High Confidence</button>
+        </div>
+        <div id="pendingTableWrap">
+          <div class="empty-state">
+            <div class="icon">🔍</div>
+            <h3>No pending opportunities</h3>
+            <p>Run the scraper to collect new opportunities for review</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tab-approved">
+        <div id="approvedTableWrap">
+          <div class="empty-state">
+            <div class="icon">✅</div>
+            <h3>No approved opportunities yet</h3>
+            <p>Approve pending opportunities to add them to the database</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tab-all">
+        <div id="allTableWrap">
+          <div class="empty-state">
+            <div class="icon">📋</div>
+            <h3>No opportunities in database</h3>
+            <p>Run the scraper to start collecting opportunities</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allOpportunities = [];
+    let pendingOpportunities = [];
+    let currentTab = 'pending';
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStats();
+      loadPendingOpportunities();
+    });
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', ['pending','approved','all'][i] === tab);
+      });
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      
+      if (tab === 'approved') loadApprovedOpportunities();
+      if (tab === 'all') loadAllOpportunities();
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/admin/api/stats');
+        const data = await res.json();
+        if (data.success) {
+          const s = data.data;
+          document.getElementById('statTotal').textContent = parseInt(s.total) || 0;
+          document.getElementById('statPending').textContent = parseInt(s.pending) || 0;
+          document.getElementById('statApproved').textContent = parseInt(s.approved) || 0;
+          document.getElementById('statRejected').textContent = parseInt(s.rejected) || 0;
+          document.getElementById('pendingCount').textContent = parseInt(s.pending) || 0;
+        }
+      } catch (e) {
+        console.error('Failed to load stats:', e);
+      }
+    }
+
+    async function loadPendingOpportunities() {
+      try {
+        const res = await fetch('/admin/api/pending');
+        const data = await res.json();
+        if (data.success) {
+          pendingOpportunities = data.data;
+          renderOpportunitiesTable('pendingTableWrap', pendingOpportunities, true);
+        }
+      } catch (e) {
+        console.error('Failed to load pending:', e);
+      }
+    }
+
+    async function loadApprovedOpportunities() {
+      try {
+        const res = await fetch('/api/opportunities?page=1&limit=50');
+        const data = await res.json();
+        if (data.success) {
+          const approved = (data.data.opportunities || []).filter(o => o.admin_status === 'approved' || !o.admin_status);
+          renderOpportunitiesTable('approvedTableWrap', approved, false);
+        }
+      } catch (e) {
+        console.error('Failed to load approved:', e);
+      }
+    }
+
+    async function loadAllOpportunities() {
+      try {
+        const res = await fetch('/api/opportunities?page=1&limit=100');
+        const data = await res.json();
+        if (data.success) {
+          renderOpportunitiesTable('allTableWrap', data.data.opportunities || [], false);
+        }
+      } catch (e) {
+        console.error('Failed to load all:', e);
+      }
+    }
+
+    function renderOpportunitiesTable(containerId, opportunities, showActions) {
+      const container = document.getElementById(containerId);
+      
+      if (!opportunities || opportunities.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">${showActions ? '⏳' : '📋'}</div>
+            <h3>No opportunities found</h3>
+            <p>${showActions ? 'Run the scraper to collect new opportunities' : 'No opportunities in this category yet'}</p>
+          </div>`;
+        return;
+      }
+
+      const rows = opportunities.map(opp => {
+        const conf = parseFloat(opp.confidence_score) || 0.75;
+        const confPct = Math.round(conf * 100);
+        const confClass = conf >= 0.8 ? 'conf-high' : conf >= 0.65 ? 'conf-med' : 'conf-low';
+        const confColor = conf >= 0.8 ? '#34d399' : conf >= 0.65 ? '#fbbf24' : '#f87171';
+        
+        const typeClass = `badge-${opp.opportunity_type || 'other'}`;
+        
+        const deadline = opp.application_deadline ? 
+          new Date(opp.application_deadline).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : 
+          'No deadline';
+        const deadlineClass = opp.application_deadline && new Date(opp.application_deadline) < new Date(Date.now() + 30*24*60*60*1000) ? 
+          'deadline-soon' : 'deadline-ok';
+        
+        const amount = opp.amount_min || opp.amount_max ? 
+          `$${(opp.amount_min || 0).toLocaleString()}${opp.amount_max ? ' – $' + opp.amount_max.toLocaleString() : '+'}` : 
+          'Not specified';
+        
+        const actions = showActions ? `
+          <div class="actions">
+            <button class="btn btn-success btn-sm" onclick="approveOpp('${opp.id}', this)">✅ Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="rejectOpp('${opp.id}', this)">❌ Reject</button>
+          </div>` : `
+          <span class="status-${opp.admin_status || 'approved'}">${(opp.admin_status || 'approved').toUpperCase()}</span>`;
+        
+        return `
+          <tr id="row-${opp.id}">
+            <td>
+              <div class="opp-title">${escapeHtml(opp.title)}</div>
+              <div class="opp-org">${escapeHtml(opp.organization || opp.source_domain || '')}</div>
+              <div class="opp-desc">${escapeHtml((opp.description || '').substring(0, 100))}${opp.description && opp.description.length > 100 ? '...' : ''}</div>
+            </td>
+            <td><span class="badge ${typeClass}">${opp.opportunity_type || 'other'}</span></td>
+            <td style="font-size:12px;color:#94a3b8;">${escapeHtml(opp.country || 'Global')}</td>
+            <td class="amount-cell">${amount}</td>
+            <td class="deadline-cell ${deadlineClass}">${deadline}</td>
+            <td>
+              <div class="confidence-bar">
+                <div class="conf-bar-wrap">
+                  <div class="conf-bar-fill ${confClass}" style="width:${confPct}%"></div>
+                </div>
+                <span class="conf-text" style="color:${confColor}">${confPct}%</span>
+              </div>
+            </td>
+            <td>${actions}</td>
+          </tr>`;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Opportunity</th>
+                <th>Type</th>
+                <th>Country</th>
+                <th>Amount</th>
+                <th>Deadline</th>
+                <th>Confidence</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    }
+
+    async function approveOpp(id, btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span>';
+      try {
+        const res = await fetch(`/admin/api/approve/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notes: 'Approved by admin' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const row = document.getElementById(`row-${id}`);
+          if (row) {
+            row.style.opacity = '0.4';
+            row.querySelector('td:last-child').innerHTML = '<span class="status-approved">✅ APPROVED</span>';
+          }
+          showAlert('Opportunity approved and added to database!', 'success');
+          loadStats();
+        }
+      } catch (e) {
+        showAlert('Failed to approve opportunity', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '✅ Approve';
+      }
+    }
+
+    async function rejectOpp(id, btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span>';
+      try {
+        const res = await fetch(`/admin/api/reject/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notes: 'Rejected by admin' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const row = document.getElementById(`row-${id}`);
+          if (row) {
+            row.style.opacity = '0.4';
+            row.querySelector('td:last-child').innerHTML = '<span class="status-rejected">❌ REJECTED</span>';
+          }
+          showAlert('Opportunity rejected.', 'info');
+          loadStats();
+        }
+      } catch (e) {
+        showAlert('Failed to reject opportunity', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '❌ Reject';
+      }
+    }
+
+    async function approveAll() {
+      const highConf = pendingOpportunities.filter(o => parseFloat(o.confidence_score) >= 0.80);
+      if (highConf.length === 0) {
+        showAlert('No high-confidence opportunities to approve (need 80%+ confidence)', 'info');
+        return;
+      }
+      
+      showAlert(`Approving ${highConf.length} high-confidence opportunities...`, 'info');
+      
+      let approved = 0;
+      for (const opp of highConf) {
+        try {
+          const res = await fetch(`/admin/api/approve/${opp.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes: 'Bulk approved - high confidence' })
+          });
+          if ((await res.json()).success) approved++;
+        } catch (e) {}
+      }
+      
+      showAlert(`✅ Successfully approved ${approved} high-confidence opportunities!`, 'success');
+      loadStats();
+      loadPendingOpportunities();
+    }
+
+    function filterOpportunities(tab) {
+      const search = document.getElementById(`${tab}Search`)?.value.toLowerCase() || '';
+      const type = document.getElementById(`${tab}TypeFilter`)?.value || '';
+      
+      let filtered = pendingOpportunities;
+      if (search) filtered = filtered.filter(o => 
+        (o.title || '').toLowerCase().includes(search) ||
+        (o.organization || '').toLowerCase().includes(search) ||
+        (o.description || '').toLowerCase().includes(search)
+      );
+      if (type) filtered = filtered.filter(o => o.opportunity_type === type);
+      
+      renderOpportunitiesTable(`${tab}TableWrap`, filtered, tab === 'pending');
+    }
+
+    async function triggerScraping() {
+      const email = document.getElementById('activationEmail').value.trim();
+      if (!email) {
+        showAlert('Please enter the activation email', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('scrapeBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Scraping in progress...';
+      
+      // Show progress UI
+      document.getElementById('progressContainer').style.display = 'block';
+      document.getElementById('logContainer').style.display = 'block';
+      
+      const sites = ['Scholarships.com', 'Fastweb', 'Grants.gov', 'Y Combinator', 'Techstars', 'Ford Foundation', 'Fulbright', 'Gates Foundation'];
+      
+      // Animate progress
+      let currentSite = 0;
+      const progressInterval = setInterval(() => {
+        if (currentSite < sites.length) {
+          // Mark previous as done
+          if (currentSite > 0) {
+            document.getElementById(`site-${currentSite-1}`).className = 'site-item done';
+          }
+          // Mark current as scraping
+          document.getElementById(`site-${currentSite}`).className = 'site-item scraping';
+          
+          const progress = Math.round((currentSite / sites.length) * 80);
+          document.getElementById('progressBar').style.width = `${progress}%`;
+          document.getElementById('progressText').textContent = `Scraping ${sites[currentSite]}... (${currentSite + 1}/${sites.length})`;
+          
+          addLog(`info`, `[${new Date().toLocaleTimeString()}] Fetching ${sites[currentSite]}...`);
+          currentSite++;
+        }
+      }, 2000);
+
+      try {
+        addLog('info', `[${new Date().toLocaleTimeString()}] Starting AI-powered scraping process...`);
+        addLog('info', `[${new Date().toLocaleTimeString()}] Activated by: ${email}`);
+        addLog('info', `[${new Date().toLocaleTimeString()}] Rate limiting: 2s delay between requests`);
+        
+        const res = await fetch('/admin/api/scrape', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ activated_by: email })
+        });
+        
+        clearInterval(progressInterval);
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          // Mark all sites as done
+          for (let i = 0; i < 8; i++) {
+            document.getElementById(`site-${i}`).className = 'site-item done';
+          }
+          document.getElementById('progressBar').style.width = '100%';
+          document.getElementById('progressText').textContent = 'Scraping completed!';
+          
+          const r = data.data;
+          addLog('success', `[${new Date().toLocaleTimeString()}] ✅ Scraping completed!`);
+          addLog('success', `[${new Date().toLocaleTimeString()}] Total scraped: ${r.totalScraped} | Pending: ${r.totalPending} | Failed: ${r.totalFailed}`);
+          
+          if (r.siteResults) {
+            r.siteResults.forEach(site => {
+              const status = site.error ? '❌' : '✅';
+              addLog(site.error ? 'error' : 'success', 
+                `[${new Date().toLocaleTimeString()}] ${status} ${site.site}: ${site.pending} pending opportunities`);
+            });
+          }
+          
+          showAlert(`✅ Scraping complete! Found ${r.totalPending} new opportunities pending review.`, 'success');
+          
+          // Reload data
+          setTimeout(() => {
+            loadStats();
+            loadPendingOpportunities();
+          }, 1000);
+        } else {
+          clearInterval(progressInterval);
+          addLog('error', `[${new Date().toLocaleTimeString()}] ❌ Error: ${data.error}`);
+          showAlert(`Error: ${data.error}`, 'error');
+          
+          // Reset site indicators
+          for (let i = 0; i < 8; i++) {
+            document.getElementById(`site-${i}`).className = 'site-item error';
+          }
+        }
+      } catch (e) {
+        clearInterval(progressInterval);
+        addLog('error', `[${new Date().toLocaleTimeString()}] ❌ Network error: ${e.message}`);
+        showAlert(`Network error: ${e.message}`, 'error');
+      }
+      
+      btn.disabled = false;
+      btn.innerHTML = '<span>🚀</span> Start Scraping (8 Sites)';
+    }
+
+    function addLog(type, message) {
+      const log = document.getElementById('logContainer');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = message;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function showAlert(message, type) {
+      const alert = document.getElementById('alertBox');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      alert.style.display = 'block';
+      setTimeout(() => { alert.style.display = 'none'; }, 5000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>

@@ -119,24 +119,8 @@ const rateLimitByApiKey = (windowMs = 15 * 60 * 1000, maxRequests = 100) => {
 // CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      'https://aipply.com',
-      'https://www.aipply.com',
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001'
-    ];
-    
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      logger.warn('CORS blocked request', { origin, ip: origin });
-      callback(new Error('Not allowed by CORS'));
-    }
+    // Allow all origins for admin panel
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

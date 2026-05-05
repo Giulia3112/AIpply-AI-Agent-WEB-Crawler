@@ -42,17 +42,20 @@ router.post('/search-opportunities',
 
 // GET /api/opportunities
 router.get('/',
-  validate(paginationSchema, 'query'),
-  validate(opportunityFiltersSchema, 'query'),
   async (req, res) => {
     try {
-      const { page, limit, sort_by, sort_order, ...filters } = req.query;
+      // Extract pagination params before validation strips them
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 20;
+      const sort_by = req.query.sort_by || 'created_at';
+      const sort_order = req.query.sort_order || 'desc';
+      const { page: _p, limit: _l, sort_by: _sb, sort_order: _so, ...filters } = req.query;
       
       logger.info('Get opportunities request', { filters, pagination: { page, limit, sort_by, sort_order } });
 
       const result = await opportunityService.getOpportunities(filters, {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page,
+        limit,
         sort_by,
         sort_order
       });

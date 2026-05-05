@@ -7,6 +7,7 @@ require('dotenv').config();
 const logger = require('./utils/logger');
 const { connectDatabase } = require('./database/connection');
 const opportunityRoutes = require('./routes/opportunities');
+const adminRoutes = require('./routes/admin');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const { corsOptions, rateLimitByApiKey } = require('./middleware/auth');
 
@@ -14,7 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors(corsOptions));
 
 // Rate limiting with API key support
@@ -38,6 +39,12 @@ app.get('/health', (req, res) => {
     version: '1.0.0'
   });
 });
+
+// Serve static files for admin panel
+app.use(require('express').static(require('path').join(__dirname, '../public')));
+
+// Admin routes
+app.use('/admin', adminRoutes);
 
 // API routes
 app.use('/api/opportunities', opportunityRoutes);

@@ -25,6 +25,9 @@ class Opportunity {
     this.raw_content = data.raw_content;
     this.extracted_data = data.extracted_data || {};
     this.status = data.status || 'active';
+    this.admin_status = data.admin_status || 'pending';
+    this.confidence_score = data.confidence_score || 0.75;
+    this.admin_notes = data.admin_notes || null;
     this.created_at = data.created_at || new Date();
     this.updated_at = data.updated_at || new Date();
     this.last_crawled_at = data.last_crawled_at || new Date();
@@ -137,6 +140,9 @@ class Opportunity {
       raw_content: row.raw_content,
       extracted_data: row.extracted_data,
       status: row.status,
+      admin_status: row.admin_status,
+      confidence_score: row.confidence_score,
+      admin_notes: row.admin_notes,
       created_at: row.created_at,
       updated_at: row.updated_at,
       last_crawled_at: row.last_crawled_at
@@ -180,6 +186,9 @@ class Opportunity {
       tags: this.tags,
       source_domain: this.source_domain,
       status: this.status,
+      admin_status: this.admin_status,
+      confidence_score: this.confidence_score,
+      admin_notes: this.admin_notes,
       is_expired: this.isExpired(),
       days_until_deadline: this.getDaysUntilDeadline(),
       created_at: this.created_at,
